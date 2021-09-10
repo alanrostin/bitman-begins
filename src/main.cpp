@@ -9,7 +9,7 @@ int main()
     GameEngine gameEngine;
 
     // Game Loop
-    while (gameEngine.isRunning())
+    while (gameEngine.isRunning() && !gameEngine.getEndGame())
     {
         // Process Input
         

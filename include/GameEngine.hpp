@@ -1,9 +1,11 @@
 #ifndef GameEngine_hpp
 #define GameEngine_hpp
 
-#include <SFML/Graphics.hpp>
+#include <iostream>
 #include <vector>
 #include <ctime>
+#include <sstream>
+#include <SFML/Graphics.hpp>
 
 class GameEngine
 {
@@ -13,6 +15,7 @@ class GameEngine
 
         // Accessors
         bool isRunning() const;
+        bool getEndGame() const;
 
         // Functions
         void spawnEnemy();
@@ -20,10 +23,12 @@ class GameEngine
         void processInput();
         void processMousePosition();
 
+        void updateText();
         void updateEnemies();
         void update();
 
-        void renderEnemies();
+        void renderText(sf::RenderTarget& target);
+        void renderEnemies(sf::RenderTarget& target);
         void render();
     
     private:
@@ -35,11 +40,20 @@ class GameEngine
         sf::Vector2i mousePositionWindow;
         sf::Vector2f mousePositionView;
 
+        // Assets
+        sf::Font font;
+
+        // Text
+        sf::Text uiText;
+
         // Game Logic
-        int points;
+        bool endGame;
+        unsigned points;
+        int health;
         float enemySpawnTimer;
         float enemySpawnTimerMax;
         int maxEnemies;
+        bool mouseHeld;
 
         // Game Object
         std::vector<sf::RectangleShape> enemies;
@@ -48,6 +62,8 @@ class GameEngine
         void initVariables();
         void initWindow();
         void initEnemies();
+        void initFont();
+        void initText();
 };
 
 #endif

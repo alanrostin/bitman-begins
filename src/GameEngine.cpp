@@ -4,6 +4,8 @@ GameEngine::GameEngine()
 {
     this -> initVariables();
     this -> initWindow();
+    this -> initFont();
+    this -> initText();
     this -> initEnemies();
 }
 
@@ -15,6 +17,11 @@ GameEngine::~GameEngine()
 bool GameEngine::isRunning() const
 {
     return this -> window -> isOpen();
+}
+
+bool GameEngine::getEndGame() const
+{
+    return this -> endGame;
 }
 
 void GameEngine::spawnEnemy()
@@ -46,6 +53,16 @@ void GameEngine::processMousePosition()
     this -> mousePositionView = this -> window -> mapPixelToCoords(this -> mousePositionWindow);
 }
 
+void GameEngine::updateText()
+{
+    std::stringstream ss;
+
+    ss << "Points: " << this -> points << "\n" 
+        << "Health: " << this -> health << "\n";
+
+    this -> uiText.setString(ss.str());
+}
+
 void GameEngine::updateEnemies()
 {
     // Updating timer for enemy spawning
@@ -63,7 +80,7 @@ void GameEngine::updateEnemies()
         }
     }
 
-    // Move enemies
+    // Moving and updating enemies
     // for (auto& enemy : this -> enemies)
     // {
     //     enemy.move(0.0f, 5.0f);
@@ -71,16 +88,45 @@ void GameEngine::updateEnemies()
     
     for (int i = 0; i < this -> enemies.size(); i++)
     {
+        bool deleted = false;
+
         this -> enemies[i].move(0.0f, 5.0f);
 
-        // Check if clicked upo
-        if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+        // If enemies is past the bottom of the screen
+        if (this -> enemies[i].getPosition().y > this -> window -> getSize().y)
         {
-            if (this -> enemies[i].getGlobalBounds().contains(this -> mousePositionView))
+            this -> enemies.erase(this -> enemies.begin() + i);
+
+            this -> health -= 1;
+        }
+    }
+
+    // Check if clicked upon
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+    {
+        if (this -> mouseHeld == false)
+        {
+            this -> mouseHeld = true;
+
+            bool deleted = false;
+
+            for (int i = 0; i < this -> enemies.size() && deleted == false; i++)
             {
-                this -> enemies.erase(this -> enemies.begin() + i);
+                if (this -> enemies[i].getGlobalBounds().contains(this -> mousePositionView))
+                {
+                    deleted = true;
+
+                    this -> enemies.erase(this -> enemies.begin() + i);
+
+                    // Add points
+                    this -> points += 10;
+                }            
             }
         }
+    }
+    else
+    {
+        this -> mouseHeld = false;
     }
 }
 
@@ -88,24 +134,44 @@ void GameEngine::update()
 {
     this -> processInput();
 
-    this -> processMousePosition();
+    if (!this -> endGame)
+    {
+        this -> processMousePosition();
 
-    this -> updateEnemies();
+        this -> updateText();
+
+        this -> updateEnemies();
+    }
+
+    // End game condition
+    if (this -> health <= 0)
+    {
+        this -> endGame = true;
+    }
 }
 
-void GameEngine::renderEnemies()
+void GameEngine::renderText(sf::RenderTarget& target)
+{
+    target.draw(this -> uiText);
+}
+
+void GameEngine::renderEnemies(sf::RenderTarget& target)
 {
     // Render all enemies
     for (auto& enemy : this -> enemies)
     {
-        this -> window -> draw(enemy);
+        target.draw(enemy);
     }
 }
 
 void GameEngine::render()
 {
     this -> window -> clear(sf::Color::Black);
-    this -> renderEnemies();
+
+    // Render game objects
+    this -> renderEnemies(*this -> window);
+    this -> renderText(*this -> window);
+
     this -> window -> display();
 }
 
@@ -114,10 +180,13 @@ void GameEngine::initVariables()
     this -> window = nullptr;
 
     // Game logic
+    this -> endGame = false;
     this -> points = 0;
+    this -> health = 10;
     this -> enemySpawnTimerMax = 10.0f;
     this -> enemySpawnTimer = this -> enemySpawnTimerMax;
-    this -> maxEnemies = 5;
+    this -> maxEnemies = 10;
+    this -> mouseHeld = false;
 }
 
 void GameEngine::initWindow()
@@ -132,4 +201,17 @@ void GameEngine::initEnemies()
     this -> enemy.setPosition(100.0f, 100.0f);
     this -> enemy.setSize(sf::Vector2f(50.0f, 50.0f));
     this -> enemy.setFillColor(sf::Color::Cyan);
+}
+
+void GameEngine::initFont()
+{
+    this -> font.loadFromFile("assets/bit_outline.ttf");
+}
+
+void GameEngine::initText()
+{
+    this -> uiText.setFont(this -> font);
+    this -> uiText.setCharacterSize(12);
+    this -> uiText.setFillColor(sf::Color::White);
+    this -> uiText.setString("NONE");
 }
