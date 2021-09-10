@@ -31,8 +31,43 @@ void GameEngine::spawnEnemy()
         0.0f
     );
 
-    this -> enemy.setFillColor(sf::Color::Cyan);
+    // Randomize enemy type
+    int enemyType = rand() % 5;
 
+    switch (enemyType)
+    {
+        case 0:
+            this -> enemy.setSize(sf::Vector2f(10.0f, 10.f));
+            this -> enemy.setFillColor(sf::Color::Magenta);    
+            break;
+        
+        case 1:
+            this -> enemy.setSize(sf::Vector2f(30.0f, 30.f));
+            this -> enemy.setFillColor(sf::Color::Blue);    
+            break;
+        
+        case 2:
+            this -> enemy.setSize(sf::Vector2f(50.0f, 50.f));
+            this -> enemy.setFillColor(sf::Color::Cyan);    
+            break;
+        
+        case 3:
+            this -> enemy.setSize(sf::Vector2f(70.0f, 70.f));
+            this -> enemy.setFillColor(sf::Color::Red);    
+            break;
+        
+        case 4:
+            this -> enemy.setSize(sf::Vector2f(100.0f, 100.f));
+            this -> enemy.setFillColor(sf::Color::Green);    
+            break;
+        
+        default:
+            this -> enemy.setSize(sf::Vector2f(100.0f, 100.f));
+            this -> enemy.setFillColor(sf::Color::Yellow);
+            break;
+    }
+
+    // Spawn enemy
     this -> enemies.push_back(this -> enemy);
 }
 
@@ -114,12 +149,32 @@ void GameEngine::updateEnemies()
             {
                 if (this -> enemies[i].getGlobalBounds().contains(this -> mousePositionView))
                 {
+                    // Add points
+                    if (this -> enemies[i].getFillColor() == sf::Color::Magenta)
+                    {
+                        this -> points += 10;
+                    }
+                    else if (this -> enemies[i].getFillColor() == sf::Color::Blue)
+                    {
+                        this -> points += 7;
+                    }
+                    else if (this -> enemies[i].getFillColor() == sf::Color::Cyan)
+                    {
+                        this -> points += 5;
+                    }
+                    else if (this -> enemies[i].getFillColor() == sf::Color::Red)
+                    {
+                        this -> points += 3;
+                    }
+                    else if (this -> enemies[i].getFillColor() == sf::Color::Green)
+                    {
+                        this -> points += 1;
+                    }
+
+                    // Delete enemy
                     deleted = true;
 
                     this -> enemies.erase(this -> enemies.begin() + i);
-
-                    // Add points
-                    this -> points += 10;
                 }            
             }
         }
@@ -182,10 +237,10 @@ void GameEngine::initVariables()
     // Game logic
     this -> endGame = false;
     this -> points = 0;
-    this -> health = 10;
-    this -> enemySpawnTimerMax = 10.0f;
+    this -> health = 20;
+    this -> enemySpawnTimerMax = 20.0f;
     this -> enemySpawnTimer = this -> enemySpawnTimerMax;
-    this -> maxEnemies = 10;
+    this -> maxEnemies = 5;
     this -> mouseHeld = false;
 }
 
