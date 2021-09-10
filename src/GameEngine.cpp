@@ -42,7 +42,8 @@ void GameEngine::processInput()
 
 void GameEngine::processMousePosition()
 {
-    this -> mousePosition = sf::Mouse::getPosition(*this -> window);
+    this -> mousePositionWindow = sf::Mouse::getPosition(*this -> window);
+    this -> mousePositionView = this -> window -> mapPixelToCoords(this -> mousePositionWindow);
 }
 
 void GameEngine::updateEnemies()
@@ -63,11 +64,24 @@ void GameEngine::updateEnemies()
     }
 
     // Move enemies
-    for (auto& enemy : this -> enemies)
-    {
-        enemy.move(0.0f, 5.0f);
-    }
+    // for (auto& enemy : this -> enemies)
+    // {
+    //     enemy.move(0.0f, 5.0f);
+    // }
     
+    for (int i = 0; i < this -> enemies.size(); i++)
+    {
+        this -> enemies[i].move(0.0f, 5.0f);
+
+        // Check if clicked upo
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+        {
+            if (this -> enemies[i].getGlobalBounds().contains(this -> mousePositionView))
+            {
+                this -> enemies.erase(this -> enemies.begin() + i);
+            }
+        }
+    }
 }
 
 void GameEngine::update()
@@ -101,7 +115,7 @@ void GameEngine::initVariables()
 
     // Game logic
     this -> points = 0;
-    this -> enemySpawnTimerMax = 1000.0f;
+    this -> enemySpawnTimerMax = 10.0f;
     this -> enemySpawnTimer = this -> enemySpawnTimerMax;
     this -> maxEnemies = 5;
 }

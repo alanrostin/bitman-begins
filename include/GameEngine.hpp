@@ -32,7 +32,8 @@ class GameEngine
         sf::Event event;
 
         // Mouse position
-        sf::Vector2i mousePosition;
+        sf::Vector2i mousePositionWindow;
+        sf::Vector2f mousePositionView;
 
         // Game Logic
         int points;
